@@ -4,7 +4,7 @@ library(tidyr)
 library(lubridate)
 library(stringr)
 library(tidymodels)
-
+install.packages("sf")
 
 # Carregar bancos ---------------------------------------------------------
 
@@ -17,12 +17,13 @@ dados_ini$P_ATIVO_1 <- str_to_lower(dados_ini$P_ATIVO_1)
 dados_ini$P_ATIVO_2 <- str_to_lower(dados_ini$P_ATIVO_2)
 dados_ini$P_ATIVO_2 <- str_to_lower(dados_ini$P_ATIVO_3)
 
-nomes_comerciais <- c("alamos","atanor","ccab","china","chn","diquat","flak","flak 200",
-                      "gramocil","gramocil super","gramoking","gramoxone","gramuron","helm","helmoxone",
-                      "herbipar","laredo","nufarm","nuquat","orbit","ouro fino","paracuat","paradox",
-                      "paraquat","paraquat sl","paraquate","pramato","quatdown","rainbow","sinon",
-                      "sprayquat","syngenta","tocha","yn","zeneca","zy",
-                      "para-quat","para quate","gramoxon","gramo","paraq","quat","syng","nortox","gromoxone","paracoate")
+nomes_comerciais <- c(
+  "alamos","atanor","ccab","china","chn","diquat","flak","flak 200",
+  "gramocil","gramocil super","gramoking","gramoxone","gramuron","helm","helmoxone",
+  "herbipar","laredo","nufarm","nuquat","orbit","ouro fino","paracuat","paradox",
+  "paraquat","paraquat sl","paraquate","pramato","quatdown","rainbow","sinon",
+  "sprayquat","syngenta","tocha","yn","zeneca","zy",
+  "para-quat","para quate","gramoxon","gramo","paraq","quat","syng","nortox","gromoxone","paracoate")
 
 x <- dados_ini %>% filter(AGENTE_1 %in% nomes_comerciais |
                             AGENTE_2 %in% nomes_comerciais |
