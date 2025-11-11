@@ -1,7 +1,7 @@
 Dados_brutos/
-#.Rproj.user/
-#.Rhistory
-#*.RData
+.Rproj.user/
+.Rhistory
+*.RData
 __pycache__/
 .ipynb_checkpoints/
 .DS_Store
