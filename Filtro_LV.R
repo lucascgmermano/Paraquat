@@ -3,6 +3,7 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(stringr)
+library(stringi)
 library(stringdist)
 
 # Carregar bancos ---------------------------------------------------------
@@ -19,6 +20,28 @@ df_ini <- read.dbf("Dados_brutos/IEXOBR11.dbf")
     
     ## Seleciona apenas nomes das colunas de interesse
     cols_alvo <- grep("^(AGENTE|P_ATIVO)", names(df_ini), value = TRUE, ignore.case = TRUE)
+    
+    ## Recodifica categorias de agente toxico
+    df_ini$AGENTE_TOX <- recode(
+      .x = df_ini$AGENTE_TOX,
+      "01" = "Medicamento",
+      "02" = "Agrotoxico agricola",
+      "03" = "Agrotoxico domestico",
+      "04" = "Agrotoxico spublica",
+      "05" = "Raticida",
+      "06" = "Produto veterinario",
+      "07" = "Produto domiciliar",
+      "08" = "Cosmetico",
+      "09" = "Produto industrial", # Ajustar se houver continuação
+      "10" = "Metal",
+      "11" = "Drogas abuso",
+      "12" = "Planta toxica",
+      "13" = "Alimento bebida",
+      "14" = "Outro",
+      "99" = "Ignorado",
+      .default = NA_character_ # Opcional: define um valor para códigos não mapeados
+    )
+    
 
 
 # Normalizacao dos dados --------------------------------------------------
@@ -40,12 +63,11 @@ df_ini <- read.dbf("Dados_brutos/IEXOBR11.dbf")
     
 # Nomes comerciais --------------------------------------------------------
 
-nome_produto <- c("c12h14n2",
-                   "bipiridínio",
+nome_produto <- c("bipiridínio",
                    "bipyridinium",
                    "flak 200",
+                   "flak",
                    "gramocil",
-                   "gramoking",
                    "gramoking",
                    "gramoxone",
                    "gramoxone 200",
@@ -70,25 +92,41 @@ nome_produto <- c("c12h14n2",
     ## Filtro complexo
     
     ### Funcao para detectar semelhancas com distância de Levenshtein 
-`%~in%` <- function(x, table, method = "lv", maxDist = 1) {
+`%~in%` <- function(x, table, method = "lv", maxDist = 2) {
   !is.na(amatch(x, table, method = method, maxDist = maxDist))
 }
 
 
-df_filtrado <- df_ini %>%
-  filter(
-    if_any(
-      c(starts_with("AGENTE"), starts_with("P_ATIVO")),
-      ~ (.x %in% nome_produto) | (.x %~in% nome_produto)
-    )
-  )
+    df_lv <- df_ini %>%
+      filter(
+        if_any(
+          c(starts_with("AGENTE"), starts_with("P_ATIVO")),
+          ~ (.x %in% nome_produto) |
+            (.x %~in% nome_produto) |
+            str_detect(.x, regex(paste(nome_produto, collapse = "|"), ignore_case = TRUE))
+        )
+      )
+    
+df_lv %>% nrow()
 
-View(df_filtrado[cols_alvo])
-
+df_lv %>% 
+  group_by(AGENTE_TOX) %>% 
+  summarise(n())
 
   ## Filtro Simples
 df_filtrado_simples <- df_ini[cols_alvo] %>% 
   filter(if_any(c(starts_with("AGENTE"), starts_with("P_ATIVO")),
               ~ .x %in% nome_produto))
 
+df_filtrado_simples %>% 
+  group_by(AGENTE_TOX) %>% 
+  summarise(n())
+
+
+View(df_lv[cols_alvo])
 View(df_filtrado_simples)
+
+
+df_lv %>% 
+  group_by(AGENTE_1) %>% 
+  count() %>% View()
