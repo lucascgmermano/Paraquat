@@ -13,8 +13,14 @@ cbo <- read.csv2(file = "CBO-Ocupacao.csv",
                  sep = "\t") %>% 
   mutate(CODIGO = as.character(CODIGO))
 
-pop <- read.csv2(file = "POP2022_Municipios_20230622.csv",
-                 encoding = "latin1")
+# http://tabnet.datasus.gov.br/cgi/deftohtm.exe?ibge/cnv/popsvs2024br.def
+pop <- read.csv2(
+  file = "POP2025_ibge_cnv.csv",
+  sep = "\t",
+  encoding = "latin1",
+  colClasses = c("ID_MN_RESI" = "character")
+)
+
 
 # Faixas etarias
 # Definição dos Limites (Breaks)
@@ -327,13 +333,5 @@ df <- df %>%
   
 # Juntar dataframe com pop
 df_final <- left_join(x = df_cbo,
-                      y = pop,
-                      by = c("ID_MN_RESI", "IBGE_MUNI"))
+                      y = pop)
 
- str(cbo)                                    
-              
- pop$IBGE_MUNI
-colnames(df)
-pop$IBGE_MUNI
-
-df$ID_MN_RESI %>% unique()
